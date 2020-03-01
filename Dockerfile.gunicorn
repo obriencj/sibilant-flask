@@ -1,0 +1,54 @@
+# An intermediary container which will have some of the necessary
+# tools to build the binary extensions in sibilant. We'll deposit the
+# resulting wheel to be installed later
+
+FROM python:3.7-alpine as builder
+
+COPY setup.py setup.json /build/
+COPY sibilant /build/sibilant/
+
+RUN \
+  apk add gcc make musl-dev python3-dev && \
+  pip install --upgrade pip setuptools wheel && \
+  mkdir /wheels && \
+  pip wheel -w /wheels /build/ uvicorn gunicorn
+
+
+# The real container, installing the wheels built into the /wheels dir
+# from the intermediary one.
+
+FROM quay.io/obriencj/sibilant
+
+LABEL maintainer = "obriencj@redhat.com" \
+      version = "0.9.0"
+
+# http://label-schema.org/rc1/
+LABEL org.label-schema.schema-version = "1.0" \
+      org.label-schema.name = "sibilant-flask-gunicorn" \
+      org.label-schema.version = "0.9.0" \
+      org.label-schema.url = "https://github.com/obriencj/sibilant-flask" \
+      org.label-schema.vcs-url = "https://github.com/obriencj/sibilant-flask"
+
+
+COPY --from=builder /wheels /wheels
+RUN \
+  pip install --upgrade pip setuptools wheel flask && \
+  pip install /wheels/*.whl && \
+  rm -rf /wheels
+
+
+ARG WSGI_APP
+ENV WSGI_APP ${WSGI_APP:-app}
+
+ARG WSGI_PORT
+ENV WSGI_PORT ${WSGI_PORT:-8080}
+
+EXPOSE ${WSGI_PORT}
+
+WORKDIR /wsgi/
+ENV PYTHONPATH /wsgi/
+
+CMD gunicorn --bind 0.0.0.0:${WSGI_PORT} ${WSGI_APP}
+
+
+# The end.

@@ -4,7 +4,7 @@
   "description": "Flask macros for Sibilant",
   "author": "Christopher O'Brien",
   "author_email": "obriencj@gmail.com",
-  "url": "https://github.com/obriencj/python-sibilant-flask",
+  "url": "https://github.com/obriencj/sibilant-flask",
   "license": "GNU Lesser General Public License v3 (LGPLv3)",
   "python_requires": ">=3.5, <3.8",
   "packages": [
@@ -15,10 +15,10 @@
       "*.lspy"
     ]
   },
-  "requires": [
-    "flask"
+  "install_requires": [
+    "flask",
+    "sibilant"
   ],
-  "test_suite": "tests",
   "zip_safe": false,
   "classifiers": [
     "Intended Audience :: Developers",

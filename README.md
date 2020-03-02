@@ -16,6 +16,15 @@ running Sibilant-based [WSGI] applications easily.
 [WSGI]: https://wsgi.readthedocs.io/
 
 
+## Installation
+
+This should be installed as a wheel to function correctly
+
+```bash
+pip3 install .
+```
+
+
 ## Dockerfiles
 
 * `Dockerfile` the simple default, this runs [Flask] directly (not for

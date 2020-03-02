@@ -15,46 +15,16 @@
 ;; <http://www.gnu.org/licenses/>.
 
 
-
-;; ===
-;; this is some helper macros which might make their way into a
-;; sibilant.site.flask module at some point.
-;; ===
-
-(def import-from flask Flask escape)
-(def import-from werkzeug.routing parse_rule)
-(def import-from json dumps)
-
-
-(defmacro url-rule [name rule . body]
-  (define formals
-    (iter-each [[converter _ignored name] (parse_rule (str rule))]
-	       (symbol name) unless: (None? converter)))
-
-  `(app.add_url_rule
-    ,(str rule)
-    endpoint: ,(str name)
-    view_func: (function ,name (,@formals) ,@body)))
-
-
-(defmacro declare-app [name]
-  ;; Flask wants its application to be named app, so that's what we
-  ;; bind it to.
-  `(define app (Flask ,(str name))))
-
-
-;;; === This is our actual app ===
-
-
 ;; one day, this will be how you'd import all the macros
 ;; (site-import flask)
-
+(def import-from sibilant.site.flask declare-app url-rule json-rule)
 
 (def import-from coolname generate_slug)
 
 
 (defmacro min-max [minval maxval val]
   `(min (max ,val ,minval) ,maxval))
+
 
 (declare-app simple-flask)
 
@@ -76,10 +46,6 @@
 
 ;; (deftemplate render-footer [footer]
 ;;   "footer.tmpl")
-
-
-(defmacro json-dict keyvals
-  `(dumps (#dict ,@keyvals)))
 
 
 (url-rule
@@ -111,11 +77,11 @@
  (render-tmpl body))
 
 
-(url-rule
+(json-rule
  json-cool-slug "/api/slug/<int:length>"
 
  (setq length (min-max 2 4 length))
- (json-dict
+ (#dict
   ["slug_length" length]
   ["slugs" (take (repeatedly generate_slug length) 10)]))
 

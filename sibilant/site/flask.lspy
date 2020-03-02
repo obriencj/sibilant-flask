@@ -37,7 +37,7 @@
 
 (defmacro json-rule [name rule . body]
   `{(def import-from json [dumps as: &dumps])
-    (url-rule ,name ,rule (&dumps ,@body))})
+    (url-rule ,name ,rule (&dumps {,@body}))})
 
 
 ;;

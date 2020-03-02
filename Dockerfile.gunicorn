@@ -1,23 +1,26 @@
-# An intermediary container which will have some of the necessary
-# tools to build the binary extensions in sibilant. We'll deposit the
-# resulting wheel to be installed later
+FROM quay.io/obriencj/sibilant as base
 
-FROM python:3.7-alpine as builder
+# An intermediary container which will have some of the necessary
+# tools to build the uvicorn and gunicorn wheels and their
+# dependencies.
+
+FROM base as builder
 
 COPY setup.py setup.json /build/
 COPY sibilant /build/sibilant/
 
 RUN \
-  apk add gcc make musl-dev python3-dev && \
+  apk add gcc make musl-dev && \
   pip install --upgrade pip setuptools wheel && \
   mkdir /wheels && \
-  pip wheel -w /wheels /build/ uvicorn gunicorn
+  pip wheel -w /wheels --no-deps /build && \
+  pip wheel -w /wheels uvicorn gunicorn
 
 
 # The real container, installing the wheels built into the /wheels dir
 # from the intermediary one.
 
-FROM quay.io/obriencj/sibilant
+FROM base
 
 LABEL maintainer = "obriencj@redhat.com" \
       version = "0.9.0"

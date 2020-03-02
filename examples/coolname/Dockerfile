@@ -1,5 +1,5 @@
 
-FROM sibilant-flask-gunicorn
+FROM sibilant-flask
 
 LABEL maintainer = "obriencj@redhat.com" \
       version = "0.9.0"
